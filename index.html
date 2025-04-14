@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="./output.css" rel="stylesheet" />
+    <title>Event Planner</title>
+  </head>
+  <body>
+    <header>
+      <h1>Event Planner</h1>
+      <nav>
+        <ul>
+          <li><a href="#events">Events</a></li>
+          <li><a href="#event-section">Plan Event</a></li>
+          <li><a href="#task-section">Tasks</a></li>
+          <li><a href="#guest-section">Guest List</a></li>
+          <li><a href="#purchase-section">Purchases</a></li>
+          <li><a href="#summary-section">Summary</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="events">
+        <h1>Your Events</h1>
+
+        <!-- Event Cards Grid -->
+        <div class="event-grid" id="eventGrid">
+          <!-- Event cards will be dynamically added here -->
+          <div class="empty-state" id="emptyState">
+            <p>No events yet! Click "Add New Event" to get started.</p>
+          </div>
+        </div>
+
+        <button id="addEventBtn" class="add-event-btn">Add New Event</button>
+      </section>
+
+      <!-- Event Form Section (Initially Hidden) -->
+      <section id="event-section" class="hidden">
+        <h1>Add New Event</h1>
+        <form id="eventForm">
+          <label for="eventName">Event Name:</label>
+          <input type="text" id="eventName" placeholder="Event Name" required />
+
+          <label for="eventDate">Event Date:</label>
+          <input type="date" id="eventDate" required />
+
+          <label for="eventLocation">Event Location:</label>
+          <input type="text" id="eventLocation" placeholder="Location" />
+
+          <label for="eventDescription">Event Description:</label>
+          <textarea id="eventDescription" placeholder="Description"></textarea>
+
+          <label for="budget">Event Budget ($):</label>
+          <input type="number" id="budget" placeholder="Budget" required />
+
+          <div class="form-buttons">
+            <button type="submit">Save Event</button>
+            <button type="button" id="cancelEventBtn">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="tasks" class="hidden">
+        <h1>Tasks for <span id="currentEventName">Event</span></h1>
+        <form id="taskForm">
+          <label for="taskName">Task Name</label>
+          <input type="text" id="taskName" placeholder="Task" required />
+
+          <label for="taskCost">Task Cost ($)</label>
+          <input type="number" id="taskCost" placeholder="Cost" required />
+
+          <label for="taskDeadline">Deadline</label>
+          <input type="date" id="taskDeadline" required />
+
+          <button type="submit">Add Task</button>
+        </form>
+
+        <h2>To-Do List:</h2>
+        <div id="taskList"></div>
+      </section>
+
+      <section id="summary-section" class="hidden">
+        <h2 id="summary">Event Summary</h2>
+        <p>Event Name: <span id="eventSummary"></span></p>
+        <p>Event Date: <span id="dateSummary"></span></p>
+        <p>Event Location: <span id="locationSummary"></span></p>
+        <p>Event Budget: $<span id="budgetSummary"></span></p>
+        <p>Total Current Cost: $<span id="costSummary">0</span></p>
+      </section>
+    </main>
+
+    <!-- Event Details Modal -->
+    <div id="eventModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2 id="modalEventName">Event Name</h2>
+        <div class="modal-details">
+          <p><strong>Date:</strong> <span id="modalEventDate"></span></p>
+          <p>
+            <strong>Location:</strong> <span id="modalEventLocation"></span>
+          </p>
+          <p><strong>Budget:</strong> $<span id="modalEventBudget"></span></p>
+          <p><strong>Description:</strong></p>
+          <p id="modalEventDescription"></p>
+        </div>
+        <div class="modal-actions">
+          <button id="viewDetailsBtn" class="action-btn">View Details</button>
+          <button id="editEventBtn" class="action-btn">Edit Event</button>
+          <button id="deleteEventBtn" class="action-btn delete-btn">
+            Delete Event
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./scripts/app.js" type="module" defer></script>
+  </body>
+</html>
