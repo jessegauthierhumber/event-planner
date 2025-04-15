@@ -1,6 +1,16 @@
-// Store events in local storage
-let events = JSON.parse(localStorage.getItem("events")) || [];
+// Import event functions
+import {
+    handleEventFormSubmit,
+    resetEventForm,
+    deleteEvent,
+    getEventForEdit,
+    getAllEvents,
+    getEventById
+} from './features/events.js';
+
+// Store currentEventId in app.js
 let currentEventId = null;
+let events = [];
 
 // DOM Elements
 const eventGrid = document.getElementById("eventGrid");
@@ -19,24 +29,35 @@ const modalEventName = document.getElementById("modalEventName");
 const modalEventDate = document.getElementById("modalEventDate");
 const modalEventLocation = document.getElementById("modalEventLocation");
 const modalEventBudget = document.getElementById("modalEventBudget");
-const modalEventDescription = document.getElementById(
-    "modalEventDescription"
-);
+const modalEventDescription = document.getElementById("modalEventDescription");
 const viewDetailsBtn = document.getElementById("viewDetailsBtn");
 const editEventBtn = document.getElementById("editEventBtn");
 const deleteEventBtn = document.getElementById("deleteEventBtn");
 
 // Event Listeners
 document.addEventListener("DOMContentLoaded", () => {
+    // Get all events on load
+    events = getAllEvents();
     renderEvents();
 
     // Event form submission
-    eventForm.addEventListener("submit", handleEventFormSubmit);
+    eventForm.addEventListener("submit", (e) => {
+        // Use the imported function to update events in localStorage
+        handleEventFormSubmit(e, currentEventId);
+
+        // Always reload events from localStorage to avoid duplicates
+        events = getAllEvents();
+        currentEventId = null;
+        resetEventForm();
+        eventSection.classList.add("hidden");
+        renderEvents();
+    });
 
     // Add event button
     addEventBtn.addEventListener("click", () => {
         currentEventId = null;
         resetEventForm();
+        document.querySelector("#event-section h1").textContent = "Add New Event";
         eventSection.classList.remove("hidden");
     });
 
@@ -56,7 +77,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // Modal action buttons
     viewDetailsBtn.addEventListener("click", viewEventDetails);
     editEventBtn.addEventListener("click", editEvent);
-    deleteEventBtn.addEventListener("click", deleteEvent);
+    deleteEventBtn.addEventListener("click", () => {
+        if (deleteEvent(currentEventId)) {
+            // Always reload events from localStorage after deletion
+            events = getAllEvents();
+            closeEventModal();
+            tasksSection.classList.add("hidden");
+            summarySection.classList.add("hidden");
+            renderEvents();
+        }
+    });
 });
 
 // Functions
@@ -102,66 +132,6 @@ function renderEvents() {
     });
 }
 
-function handleEventFormSubmit(e) {
-    e.preventDefault();
-
-    const eventName = document.getElementById("eventName").value;
-    const eventDate = document.getElementById("eventDate").value;
-    const eventLocation = document.getElementById("eventLocation").value;
-    const eventDescription =
-        document.getElementById("eventDescription").value;
-    const budget = document.getElementById("budget").value;
-
-    if (currentEventId) {
-        // Update existing event
-        const eventIndex = events.findIndex(
-            (event) => event.id === currentEventId
-        );
-        if (eventIndex !== -1) {
-            events[eventIndex] = {
-                ...events[eventIndex],
-                name: eventName,
-                date: eventDate,
-                location: eventLocation,
-                description: eventDescription,
-                budget: parseFloat(budget),
-            };
-        }
-    } else {
-        // Create new event
-        const newEvent = {
-            id: Date.now().toString(),
-            name: eventName,
-            date: eventDate,
-            location: eventLocation,
-            description: eventDescription,
-            budget: parseFloat(budget),
-            tasks: [],
-        };
-
-        events.push(newEvent);
-    }
-
-    // Save to local storage
-    localStorage.setItem("events", JSON.stringify(events));
-
-    // Reset and hide form
-    resetEventForm();
-    eventSection.classList.add("hidden");
-
-    // Refresh event grid
-    renderEvents();
-}
-
-function resetEventForm() {
-    eventForm.reset();
-    document.getElementById("eventName").value = "";
-    document.getElementById("eventDate").value = "";
-    document.getElementById("eventLocation").value = "";
-    document.getElementById("eventDescription").value = "";
-    document.getElementById("budget").value = "";
-}
-
 function openEventModal(event) {
     currentEventId = event.id;
 
@@ -181,19 +151,21 @@ function openEventModal(event) {
     modalEventDescription.textContent =
         event.description || "No description available.";
 
-    // Show the modal
+    // Show the modal with proper styling
     eventModal.style.display = "block";
+    document.body.style.overflow = "hidden"; // Prevent scrolling behind modal
 }
 
 function closeEventModal() {
     eventModal.style.display = "none";
+    document.body.style.overflow = "auto"; // Restore page scrolling
 }
 
 function viewEventDetails() {
     closeEventModal();
 
-    // Find the current event
-    const event = events.find((e) => e.id === currentEventId);
+    // Find the current event using imported function
+    const event = getEventById(currentEventId);
     if (!event) return;
 
     // Update summary section
@@ -306,42 +278,20 @@ function setupTaskFormForEvent(eventId) {
 function editEvent() {
     closeEventModal();
 
-    // Find the current event
-    const event = events.find((e) => e.id === currentEventId);
+    // Find the current event using the imported function
+    const event = getEventForEdit(currentEventId);
     if (!event) return;
+
+    // Change the form title to indicate editing
+    document.querySelector("#event-section h1").textContent = "Edit Event";
 
     // Fill the form with event data
     document.getElementById("eventName").value = event.name;
     document.getElementById("eventDate").value = event.date;
     document.getElementById("eventLocation").value = event.location || "";
-    document.getElementById("eventDescription").value =
-        event.description || "";
+    document.getElementById("eventDescription").value = event.description || "";
     document.getElementById("budget").value = event.budget;
 
     // Show event section
     eventSection.classList.remove("hidden");
-}
-
-function deleteEvent() {
-    if (
-        confirm(
-            "Are you sure you want to delete this event? This action cannot be undone."
-        )
-    ) {
-        // Remove event from array
-        events = events.filter((event) => event.id !== currentEventId);
-
-        // Save to local storage
-        localStorage.setItem("events", JSON.stringify(events));
-
-        // Close modal
-        closeEventModal();
-
-        // Hide task and summary sections
-        tasksSection.classList.add("hidden");
-        summarySection.classList.add("hidden");
-
-        // Refresh event grid
-        renderEvents();
-    }
 }
