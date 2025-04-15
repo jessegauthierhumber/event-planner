@@ -91,10 +91,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Functions
 function renderEvents() {
-    // Clear the event grid (except for the empty state)
-    while (eventGrid.firstChild && eventGrid.firstChild !== emptyState) {
+    // Clear the event grid completely
+    while (eventGrid.firstChild) {
         eventGrid.removeChild(eventGrid.firstChild);
     }
+
+    // Add back the empty state
+    eventGrid.appendChild(emptyState);
 
     // Show/hide empty state
     if (events.length === 0) {
