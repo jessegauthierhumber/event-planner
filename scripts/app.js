@@ -8,6 +8,8 @@ import {
     getEventById
 } from './features/events.js';
 
+import { setupPurchaseForm } from './features/budget.js';
+
 // Store currentEventId in app.js
 let currentEventId = null;
 let events = [];
@@ -247,6 +249,14 @@ function viewEventDetails() {
 
     // Show guest list
     showGuestList(event);
+
+    // Setup purchase form for this event
+    setupPurchaseForm(event.id);
+
+    // Show purchase section
+    document.getElementById("purchase-section").classList.remove("hidden");
+
+    
 }
 
 function setupTaskFormForEvent(eventId) {
