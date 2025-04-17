@@ -7,6 +7,11 @@ import {
     getAllEvents,
     getEventById
 } from './features/events.js';
+import {
+    addTaskToEvent,
+    deleteTaskFromEvent,
+    getTasksForEvent
+} from './features/tasks.js';
 
 // Store currentEventId in app.js
 let currentEventId = null;
@@ -21,6 +26,10 @@ const cancelEventBtn = document.getElementById("cancelEventBtn");
 const eventSection = document.getElementById("event-section");
 const tasksSection = document.getElementById("tasks");
 const summarySection = document.getElementById("summary-section");
+
+// Add reference to all tasks section
+const allTasksSection = document.getElementById("all-tasks");
+const allTasksList = document.getElementById("allTasksList");
 
 // Modal Elements
 const eventModal = document.getElementById("eventModal");
@@ -39,6 +48,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Get all events on load
     events = getAllEvents();
     renderEvents();
+
+    // Optionally, show all tasks section on page load or add a nav button to toggle
+    renderAllTasks();
 
     // Event form submission
     eventForm.addEventListener("submit", (e) => {
@@ -202,8 +214,9 @@ function viewEventDetails() {
     const taskList = document.getElementById("taskList");
     taskList.innerHTML = "";
 
-    if (event.tasks && event.tasks.length > 0) {
-        event.tasks.forEach((task) => {
+    const tasks = getTasksForEvent(event.id);
+    if (tasks && tasks.length > 0) {
+        tasks.forEach((task) => {
             const taskItem = document.createElement("div");
             taskItem.className = "task-item";
 
@@ -218,6 +231,15 @@ function viewEventDetails() {
           <button class="delete-task" data-id="${task.id}">Delete</button>
         </div>
       `;
+
+            // Add delete handler
+            taskItem.querySelector('.delete-task').addEventListener('click', () => {
+                deleteTaskFromEvent(event.id, task.id);
+                // Reload events from localStorage to get the updated tasks
+                events = getAllEvents();
+                viewEventDetails();
+                renderAllTasks();
+            });
 
             taskList.appendChild(taskItem);
         });
@@ -248,34 +270,71 @@ function setupTaskFormForEvent(eventId) {
         const taskCost = document.getElementById("taskCost").value;
         const taskDeadline = document.getElementById("taskDeadline").value;
 
-        // Find the event
-        const eventIndex = events.findIndex((event) => event.id === eventId);
-        if (eventIndex === -1) return;
-
-        // Create task
         const newTask = {
-            id: Date.now().toString(),
             name: taskName,
             cost: parseFloat(taskCost),
             deadline: taskDeadline,
         };
 
-        // Add task to event
-        if (!events[eventIndex].tasks) {
-            events[eventIndex].tasks = [];
-        }
+        addTaskToEvent(eventId, newTask);
 
-        events[eventIndex].tasks.push(newTask);
-
-        // Save to local storage
-        localStorage.setItem("events", JSON.stringify(events));
+        // Reload events from localStorage to get the updated tasks
+        events = getAllEvents();
 
         // Reset form
         newTaskForm.reset();
 
         // Refresh view
         viewEventDetails();
+        renderAllTasks();
     });
+}
+
+// Render all tasks from all events
+function renderAllTasks() {
+    const events = getAllEvents();
+    let allTasks = [];
+    events.forEach(event => {
+        if (event.tasks && event.tasks.length > 0) {
+            event.tasks.forEach(task => {
+                allTasks.push({ ...task, eventName: event.name, eventId: event.id });
+            });
+        }
+    });
+    allTasksList.innerHTML = "";
+    if (allTasks.length === 0) {
+        allTasksList.innerHTML = "<p>No tasks found.</p>";
+        allTasksSection.classList.remove("hidden");
+        return;
+    }
+    allTasks.forEach(task => {
+        const taskDiv = document.createElement("div");
+        taskDiv.className = "task-item";
+        taskDiv.innerHTML = `
+            <div class="task-details">
+                <h3>${task.name}</h3>
+                <p>Cost: $${task.cost}</p>
+                <p>Deadline: ${new Date(task.deadline).toLocaleDateString()}</p>
+                <p><em>Event: ${task.eventName}</em></p>
+            </div>
+            <div class="task-actions">
+                <button class="delete-task" data-id="${task.id}" data-event-id="${task.eventId}">Delete</button>
+            </div>
+        `;
+        // Add delete handler
+        taskDiv.querySelector('.delete-task').addEventListener('click', () => {
+            deleteTaskFromEvent(task.eventId, task.id);
+            // Reload events from localStorage before updating UI
+            events = getAllEvents();
+            renderAllTasks();
+            // Optionally refresh event details if visible
+            if (!tasksSection.classList.contains('hidden') && currentEventId === task.eventId) {
+                viewEventDetails();
+            }
+        });
+        allTasksList.appendChild(taskDiv);
+    });
+    allTasksSection.classList.remove("hidden");
 }
 
 function editEvent() {
