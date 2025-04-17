@@ -28,6 +28,15 @@ const cancelEventBtn = document.getElementById("cancelEventBtn");
 const eventSection = document.getElementById("event-section");
 const tasksSection = document.getElementById("tasks");
 const summarySection = document.getElementById("summary-section");
+const allTasksSection = document.getElementById("all-tasks");
+const allTasksList = document.getElementById("allTasksList");
+const guestSection = document.getElementById("guest-section");
+const guestList = document.getElementById("guestList");
+const guestCount = document.getElementById("guestCount");
+const guestForm = document.getElementById("guestForm");
+const guestEventName = document.getElementById("guestEventName");
+const purchaseSection = document.getElementById("purchase-section");
+const purchaseEventName = document.getElementById("purchaseEventName");
 
 
 
@@ -97,6 +106,16 @@ document.addEventListener("DOMContentLoaded", () => {
             tasksSection.classList.add("hidden");
             summarySection.classList.add("hidden");
             renderEvents();
+        }
+    });
+
+    // Listen for purchase-added custom event
+    document.addEventListener('purchase-added', (e) => {
+        // Refresh events from localStorage
+        events = getAllEvents();
+        if (e.detail && e.detail.eventId === currentEventId) {
+            // Refresh view if the current event was updated
+            viewEventDetails();
         }
     });
 });
@@ -260,13 +279,18 @@ function viewEventDetails() {
     // Show guest list
     showGuestList(event);
 
+    // Update purchase section title
+    if (purchaseEventName) {
+        purchaseEventName.textContent = event.name;
+    }
+
     // Setup purchase form for this event
     setupPurchaseForm(event.id);
 
     // Show purchase section
-    document.getElementById("purchase-section").classList.remove("hidden");
-
-    
+    if (purchaseSection) {
+        purchaseSection.classList.remove("hidden");
+    }
 }
 
 function setupTaskFormForEvent(eventId) {
@@ -387,7 +411,7 @@ function setupGuestFormForEvent(eventId) {
         const email = document.getElementById("guestEmail").value;
         const phone = document.getElementById("guestPhone").value;
         const rsvp = document.getElementById("guestRSVP").value;
-    
+
         // Finding the event
         const eventIndex = events.findIndex((event) => event.id === eventId);
         if (eventIndex === -1) return;

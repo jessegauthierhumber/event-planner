@@ -13,7 +13,7 @@ export function setupPurchaseForm(eventId) {
 
         // Find the event
         const events = JSON.parse(localStorage.getItem("events")) || [];
-        const eventIndex = events.findIndex((event) => event.id === event.id);
+        const eventIndex = events.findIndex((event) => event.id === eventId);
         if (eventIndex === -1) return;
 
         // Create new purchase
@@ -36,7 +36,7 @@ export function setupPurchaseForm(eventId) {
         // Reset form
         newPurchaseForm.reset();
 
-        // Refresh view
-        viewEventDetails();
+        // Dispatch a custom event instead of directly calling viewEventDetails
+        document.dispatchEvent(new CustomEvent('purchase-added', { detail: { eventId } }));
     });
 }
