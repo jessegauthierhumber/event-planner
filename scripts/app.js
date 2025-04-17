@@ -22,6 +22,16 @@ const eventSection = document.getElementById("event-section");
 const tasksSection = document.getElementById("tasks");
 const summarySection = document.getElementById("summary-section");
 
+const guestSection = document.getElementById("guest-section");
+const guestEventName = document.getElementById("guestEventName");
+const guestForm = document.getElementById("guestForm");
+const guestName = document.getElementById("guestName");
+const guestEmail = document.getElementById("guestEmail");
+const guestPhone = document.getElementById("guestPhone");
+const guestRSVP = document.getElementById("guestRSVP");
+const guestList = document.getElementById("guestList");
+const guestCount = document.getElementById("guestCount");
+
 // Modal Elements
 const eventModal = document.getElementById("eventModal");
 const closeModal = document.querySelector(".close-modal");
@@ -297,4 +307,50 @@ function editEvent() {
 
     // Show event section
     eventSection.classList.remove("hidden");
+}
+
+function setupTaskFormForEvent(eventId) {
+    const taskForm = document.getElementById("taskForm");
+
+    // Remove any existing listeners
+    const newGuestForm = guestForm.cloneNode(true);
+    guestForm.parentNode.replaceChild(newGuestForm, guestForm);
+
+    // Add new listener
+    newGuestForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("guestName").value;
+        const email = document.getElementById("guestEmail").value;
+        const phone = document.getElementById("guestPhone").value;
+        const rsvp = document.getElementById("guestRSVP").value;
+    
+        // Finding the event
+        const eventIndex = events.findIndex((event) => event.id === eventId);
+        if (eventIndex === -1) return;
+
+        // Create guest
+        const newGuest = {
+            id: Date.now().toString(),
+            name: name,
+            email: email,
+            phone: phone,
+            rsvp: rsvp,
+        };
+
+        // Add guest to event
+        if (!events[eventIndex].guests) {
+            events[eventIndex].guests = [];
+        }
+        events[eventIndex].guests.push(newGuest);
+
+        // Save to local storage
+        localStorage.setItem("events", JSON.stringify(events));
+
+        // Reset form
+        newGuestForm.reset();
+
+        // Refresh view
+        viewEventDetails();
+    });
 }
