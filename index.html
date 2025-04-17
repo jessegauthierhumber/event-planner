@@ -78,6 +78,66 @@
         <div id="taskList"></div>
       </section>
 
+<<<<<<< Updated upstream
+=======
+      <!--Add guests-->
+      <section id="guest-section" class="hidden">
+        <h1>Guest List for <span id="guestEventName">Event</span></h1>
+        <form id="guestForm">
+          <label for="guestName">Guest Name</label>
+          <input type="text" id="guestName" placeholder="Guest Name" required />
+
+          <label for="guestPhone">Phone Number:</label>
+          <input
+            type="tel"
+            id="guestPhone"
+            placeholder="Phone Number"
+            required
+          />
+
+          <label for="guestEmail">Email:</label>
+          <input type="email" id="guestEmail" placeholder="Email" required />
+
+          <label for="guestRSVP">RSVP Status</label>
+          <select id="guestRSVP" required>
+            <option value="RSVPStatus">Select RSVP Status</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="notComing">NotComing</option>
+          </select>
+
+          <button type="submit">Add Guest</button>
+        </form>
+
+        <h2>Guest List:</h2>
+        <p>Total Guests: <span id="guestCount">0</span></p>
+        <div id="guestList"></div>
+      </section>
+
+      <!--Add purchases-->
+      <section id="purchase-section" class="hidden">
+        <h1>Purchases for <span id="purchaseEventName">Event</span></h1>
+        <form id="purchaseForm">
+          <label for="purchaseName">Purchase Name</label>
+          <input
+            type="text"
+            id="purchaseName"
+            placeholder="Purchase Name"
+            required
+          />
+
+          <label for="purchaseCost">Cost ($)</label>
+          <input type="number" id="purchaseCost" placeholder="Cost" required />
+
+          <button type="submit">Add Purchase</button>
+        </form>
+
+        <h2>Purchases:</h2>
+        <p>Total Purchases: $<span id="totalPurchases">0</span></p>
+        <div id="purchaseList"></div>
+      </section>
+
+>>>>>>> Stashed changes
       <section id="summary-section" class="hidden">
         <h2 id="summary">Event Summary</h2>
         <p>Event Name: <span id="eventSummary"></span></p>
