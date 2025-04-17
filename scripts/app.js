@@ -241,6 +241,12 @@ function viewEventDetails() {
 
     // Setup task form submission for this event
     setupTaskFormForEvent(event.id);
+
+    // Setup guest form submission for this event
+    setupGuestFormForEvent(event.id);
+
+    // Show guest list
+    showGuestList(event);
 }
 
 function setupTaskFormForEvent(eventId) {
@@ -309,7 +315,7 @@ function editEvent() {
     eventSection.classList.remove("hidden");
 }
 
-function setupTaskFormForEvent(eventId) {
+function setupGuestFormForEvent(eventId) {
     const taskForm = document.getElementById("taskForm");
 
     // Remove any existing listeners
@@ -353,4 +359,53 @@ function setupTaskFormForEvent(eventId) {
         // Refresh view
         viewEventDetails();
     });
+}
+
+function showGuestList(event) {
+    guestEventName.textContent = event.name;
+    guestSection.classList.remove("hidden");
+
+    // Display guests
+    guestList.innerHTML = "";
+
+    if (event.guests && event.guests.length > 0) {
+        event.guests.forEach((guest, index) => {
+            const guestItem = document.createElement("div");
+            guestItem.className = "guest-item";
+
+            guestItem.innerHTML = `
+        <div class="guest-details">
+          <h3>${guest.name}</h3>
+            <p>Email: ${guest.email}</p>
+            <p>Phone: ${guest.phone}</p>
+            <p>RSVP: 
+              <select class="rsvp-select" data-guest-index="${index}">
+                <option value="yes" ${guest.rsvp === "yes" ? "selected" : ""}>Yes</option>
+                <option value="no" ${guest.rsvp === "no" ? "selected" : ""}>No</option>
+                <option value="maybe" ${guest.rsvp === "maybe" ? "selected" : ""}>Maybe</option>
+              </select>
+            </p>
+        </div>
+        <div class="guest-actions">
+            <button class="delete-guest" data-id="${guest.id}">Delete</button>
+        </div>
+        `;
+
+            guestList.appendChild(guestItem);
+        });
+
+        // Update RSVP on change
+        guestList.querySelectorAll(".rsvp-select").forEach((select) => {
+            select.addEventListener("change", (e) => {
+                const index = e.target.getAttribute("data-guest-index");
+                event.guests[index].rsvp = e.target.value;
+                localStorage.setItem("events", JSON.stringify(events));
+            });
+        });
+    } else {
+        guestList.innerHTML = "<p>No guests added yet.</p>";
+    }
+
+    // Update count
+    guestCount.textContent = event.guests ? event.guests.length : 0;
 }
