@@ -5,7 +5,11 @@ import {
     deleteEvent,
     getEventForEdit,
     getAllEvents,
-    getEventById
+    getEventById,
+    addGuestToEvent,
+    updateGuest,
+    deleteGuest,
+    getGuestsForEvent
 } from './features/events.js';
 import {
     addTaskToEvent,
@@ -397,8 +401,6 @@ function editEvent() {
 }
 
 function setupGuestFormForEvent(eventId) {
-    const taskForm = document.getElementById("taskForm");
-
     // Remove any existing listeners
     const newGuestForm = guestForm.cloneNode(true);
     guestForm.parentNode.replaceChild(newGuestForm, guestForm);
@@ -412,27 +414,19 @@ function setupGuestFormForEvent(eventId) {
         const phone = document.getElementById("guestPhone").value;
         const rsvp = document.getElementById("guestRSVP").value;
 
-        // Finding the event
-        const eventIndex = events.findIndex((event) => event.id === eventId);
-        if (eventIndex === -1) return;
-
-        // Create guest
+        // Create guest object
         const newGuest = {
-            id: Date.now().toString(),
             name: name,
             email: email,
             phone: phone,
             rsvp: rsvp,
         };
 
-        // Add guest to event
-        if (!events[eventIndex].guests) {
-            events[eventIndex].guests = [];
-        }
-        events[eventIndex].guests.push(newGuest);
+        // Add guest using the imported function
+        addGuestToEvent(eventId, newGuest);
 
-        // Save to local storage
-        localStorage.setItem("events", JSON.stringify(events));
+        // Reload events from localStorage
+        events = getAllEvents();
 
         // Reset form
         newGuestForm.reset();
@@ -449,8 +443,11 @@ function showGuestList(event) {
     // Display guests
     guestList.innerHTML = "";
 
-    if (event.guests && event.guests.length > 0) {
-        event.guests.forEach((guest, index) => {
+    // Get guests for the event using our new function
+    const guests = getGuestsForEvent(event.id);
+
+    if (guests && guests.length > 0) {
+        guests.forEach((guest, index) => {
             const guestItem = document.createElement("div");
             guestItem.className = "guest-item";
 
@@ -460,10 +457,13 @@ function showGuestList(event) {
             <p>Email: ${guest.email}</p>
             <p>Phone: ${guest.phone}</p>
             <p>RSVP: 
-              <select class="rsvp-select" data-guest-index="${index}">
+              <select class="rsvp-select" data-guest-id="${guest.id}">
                 <option value="yes" ${guest.rsvp === "yes" ? "selected" : ""}>Yes</option>
                 <option value="no" ${guest.rsvp === "no" ? "selected" : ""}>No</option>
                 <option value="maybe" ${guest.rsvp === "maybe" ? "selected" : ""}>Maybe</option>
+                <option value="pending" ${guest.rsvp === "pending" ? "selected" : ""}>Pending</option>
+                <option value="confirmed" ${guest.rsvp === "confirmed" ? "selected" : ""}>Confirmed</option>
+                <option value="notComing" ${guest.rsvp === "notComing" ? "selected" : ""}>Not Coming</option>
               </select>
             </p>
         </div>
@@ -475,12 +475,30 @@ function showGuestList(event) {
             guestList.appendChild(guestItem);
         });
 
-        // Update RSVP on change
+        // Update RSVP on change - using our new update function
         guestList.querySelectorAll(".rsvp-select").forEach((select) => {
             select.addEventListener("change", (e) => {
-                const index = e.target.getAttribute("data-guest-index");
-                event.guests[index].rsvp = e.target.value;
-                localStorage.setItem("events", JSON.stringify(events));
+                const guestId = e.target.getAttribute("data-guest-id");
+                updateGuest(event.id, guestId, { rsvp: e.target.value });
+
+                // Reload events from localStorage after update
+                events = getAllEvents();
+            });
+        });
+
+        // Add delete functionality for guests
+        guestList.querySelectorAll(".delete-guest").forEach((button) => {
+            button.addEventListener("click", (e) => {
+                const guestId = e.target.getAttribute("data-id");
+                if (confirm("Are you sure you want to remove this guest?")) {
+                    deleteGuest(event.id, guestId);
+
+                    // Reload events from localStorage
+                    events = getAllEvents();
+
+                    // Refresh the view
+                    viewEventDetails();
+                }
             });
         });
     } else {
@@ -488,5 +506,5 @@ function showGuestList(event) {
     }
 
     // Update count
-    guestCount.textContent = event.guests ? event.guests.length : 0;
+    guestCount.textContent = guests ? guests.length : 0;
 }

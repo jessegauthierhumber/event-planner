@@ -85,6 +85,94 @@ export function deleteEvent(eventId) {
 }
 
 /**
+ * Adds a guest to an event
+ * @param {string} eventId - ID of the event to add the guest to
+ * @param {Object} guest - Guest object with name, email, phone, and rsvp properties
+ * @returns {boolean} Whether the operation was successful
+ */
+export function addGuestToEvent(eventId, guest) {
+    const eventIndex = events.findIndex(event => event.id === eventId);
+    if (eventIndex === -1) return false;
+
+    // Initialize guests array if it doesn't exist
+    if (!events[eventIndex].guests) {
+        events[eventIndex].guests = [];
+    }
+
+    // Add unique ID to guest if not present
+    if (!guest.id) {
+        guest.id = Date.now().toString();
+    }
+
+    // Add guest to event
+    events[eventIndex].guests.push(guest);
+
+    // Save to local storage
+    localStorage.setItem("events", JSON.stringify(events));
+
+    return true;
+}
+
+/**
+ * Updates a guest's information
+ * @param {string} eventId - ID of the event containing the guest
+ * @param {string} guestId - ID of the guest to update
+ * @param {Object} updatedData - New guest data
+ * @returns {boolean} Whether the operation was successful
+ */
+export function updateGuest(eventId, guestId, updatedData) {
+    const eventIndex = events.findIndex(event => event.id === eventId);
+    if (eventIndex === -1) return false;
+
+    // Find the guest
+    const guestIndex = events[eventIndex].guests?.findIndex(guest => guest.id === guestId);
+    if (guestIndex === -1 || guestIndex === undefined) return false;
+
+    // Update the guest
+    events[eventIndex].guests[guestIndex] = {
+        ...events[eventIndex].guests[guestIndex],
+        ...updatedData
+    };
+
+    // Save to local storage
+    localStorage.setItem("events", JSON.stringify(events));
+
+    return true;
+}
+
+/**
+ * Deletes a guest from an event
+ * @param {string} eventId - ID of the event containing the guest
+ * @param {string} guestId - ID of the guest to delete
+ * @returns {boolean} Whether the operation was successful
+ */
+export function deleteGuest(eventId, guestId) {
+    const eventIndex = events.findIndex(event => event.id === eventId);
+    if (eventIndex === -1) return false;
+
+    // Check if guests array exists
+    if (!events[eventIndex].guests) return false;
+
+    // Filter out the guest
+    events[eventIndex].guests = events[eventIndex].guests.filter(guest => guest.id !== guestId);
+
+    // Save to local storage
+    localStorage.setItem("events", JSON.stringify(events));
+
+    return true;
+}
+
+/**
+ * Gets all guests for an event
+ * @param {string} eventId - ID of the event
+ * @returns {Array} Array of guests or empty array if none found
+ */
+export function getGuestsForEvent(eventId) {
+    const event = events.find(event => event.id === eventId);
+    return event && event.guests ? event.guests : [];
+}
+
+/**
  * Gets event data for editing
  * @param {string} eventId - ID of event to edit
  * @returns {Object|undefined} Event object if found
