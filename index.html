@@ -14,6 +14,9 @@
           <li><a href="#eventGrid">Events</a></li>
           <li><a href="#event-section">Planner</a></li>
           <li><a href="#tasks">Tasks</a></li>
+          <li>
+            <a href="#all-purchases" id="showAllPurchasesBtn">Purchases</a>
+          </li>
         </ul>
       </nav>
     </header>
@@ -86,7 +89,12 @@
           <input type="text" id="guestName" placeholder="Guest Name" required />
 
           <label for="guestPhone">Phone Number:</label>
-          <input type="tel" id="guestPhone" placeholder="Phone Number" required/>
+          <input
+            type="tel"
+            id="guestPhone"
+            placeholder="Phone Number"
+            required
+          />
 
           <label for="guestEmail">Email:</label>
           <input type="email" id="guestEmail" placeholder="Email" required />
@@ -112,7 +120,12 @@
         <h1>Purchases for <span id="purchaseEventName">Event</span></h1>
         <form id="purchaseForm">
           <label for="purchaseName">Purchase Name</label>
-          <input type="text" id="purchaseName" placeholder="Purchase Name" required />
+          <input
+            type="text"
+            id="purchaseName"
+            placeholder="Purchase Name"
+            required
+          />
 
           <label for="purchaseCost">Cost ($)</label>
           <input type="number" id="purchaseCost" placeholder="Cost" required />
@@ -139,6 +152,17 @@
         <h1>All Tasks</h1>
         <div id="allTasksList"></div>
       </section>
+
+      <!-- All Purchases Section -->
+      <section id="all-purchases" class="hidden">
+        <h1>All Purchases</h1>
+        <p>
+          Total Purchases Across All Events: $<span id="totalAllPurchases"
+            >0.00</span
+          >
+        </p>
+        <div id="allPurchasesList"></div>
+      </section>
     </main>
 
     <!-- Event Details Modal -->
@@ -159,7 +183,9 @@
         <div class="modal-actions">
           <button id="viewDetailsBtn" class="action-btn">View Details</button>
           <button id="editEventBtn" class="action-btn">Edit Event</button>
-          <button id="deleteEventBtn" class="action-btn delete-btn">Delete Event</button>
+          <button id="deleteEventBtn" class="action-btn delete-btn">
+            Delete Event
+          </button>
         </div>
       </div>
     </div>

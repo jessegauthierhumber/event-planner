@@ -17,7 +17,11 @@ import {
     getTasksForEvent
 } from './features/tasks.js';
 
-import { setupPurchaseForm } from './features/budget.js';
+import {
+    setupPurchaseForm,
+    getPurchasesForEvent,
+    deletePurchase
+} from './features/budget.js';
 
 // Store currentEventId in app.js
 let currentEventId = null;
@@ -41,6 +45,9 @@ const guestForm = document.getElementById("guestForm");
 const guestEventName = document.getElementById("guestEventName");
 const purchaseSection = document.getElementById("purchase-section");
 const purchaseEventName = document.getElementById("purchaseEventName");
+const allPurchasesSection = document.getElementById("all-purchases");
+const allPurchasesList = document.getElementById("allPurchasesList");
+const showAllPurchasesBtn = document.getElementById("showAllPurchasesBtn");
 
 
 
@@ -61,9 +68,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Get all events on load
     events = getAllEvents();
     renderEvents();
+    renderAllPurchases(); // Ensure this runs on initial load
+    renderAllTasks(); // Ensure this runs on initial load
 
-    // Optionally, show all tasks section on page load or add a nav button to toggle
-    renderAllTasks();
 
     // Event form submission
     eventForm.addEventListener("submit", (e) => {
@@ -109,19 +116,16 @@ document.addEventListener("DOMContentLoaded", () => {
             closeEventModal();
             tasksSection.classList.add("hidden");
             summarySection.classList.add("hidden");
+            guestSection.classList.add("hidden"); // Hide guest section too
+            purchaseSection.classList.add("hidden"); // Hide purchase section too
             renderEvents();
+            renderAllPurchases(); // Re-render all purchases after deleting an event
+            renderAllTasks(); // Re-render all tasks
         }
     });
 
-    // Listen for purchase-added custom event
-    document.addEventListener('purchase-added', (e) => {
-        // Refresh events from localStorage
-        events = getAllEvents();
-        if (e.detail && e.detail.eventId === currentEventId) {
-            // Refresh view if the current event was updated
-            viewEventDetails();
-        }
-    });
+
+
 });
 
 // Functions
@@ -219,16 +223,28 @@ function viewEventDetails() {
         event.location || "No location";
     document.getElementById("budgetSummary").textContent = event.budget;
 
-    // Calculate total cost from tasks
-    let totalCost = 0;
+    // Calculate total cost from tasks and purchases
+    let totalTaskCost = 0;
     if (event.tasks) {
-        totalCost = event.tasks.reduce(
+        totalTaskCost = event.tasks.reduce(
             (sum, task) => sum + parseFloat(task.cost || 0),
             0
         );
     }
-    document.getElementById("costSummary").textContent =
-        totalCost.toFixed(2);
+
+    // Calculate purchase costs
+    let totalPurchaseCost = 0;
+    const purchases = getPurchasesForEvent(event.id);
+    if (purchases && purchases.length > 0) {
+        totalPurchaseCost = purchases.reduce(
+            (sum, purchase) => sum + parseFloat(purchase.cost || 0),
+            0
+        );
+    }
+
+    // Update total cost in summary (tasks + purchases)
+    const totalEventCost = totalTaskCost + totalPurchaseCost;
+    document.getElementById("costSummary").textContent = totalEventCost.toFixed(2);
 
     // Update tasks section
     document.getElementById("currentEventName").textContent = event.name;
@@ -288,8 +304,11 @@ function viewEventDetails() {
         purchaseEventName.textContent = event.name;
     }
 
-    // Setup purchase form for this event
-    setupPurchaseForm(event.id);
+    // Setup purchase form for this event - NOW HANDLED HERE
+    setupPurchaseFormListener(event.id);
+
+    // Show purchases list
+    showPurchaseList(event.id);
 
     // Show purchase section
     if (purchaseSection) {
@@ -431,7 +450,7 @@ function setupGuestFormForEvent(eventId) {
         // Reset form
         newGuestForm.reset();
 
-        // Refresh view
+        // Refresh view directly
         viewEventDetails();
     });
 }
@@ -507,4 +526,189 @@ function showGuestList(event) {
 
     // Update count
     guestCount.textContent = guests ? guests.length : 0;
+}
+
+/**
+ * Display purchases list for an event and add delete functionality
+ * @param {string} eventId - ID of the event
+ */
+function showPurchaseList(eventId) {
+    const purchaseList = document.getElementById("purchaseList");
+    const totalPurchasesElement = document.getElementById("totalPurchases");
+
+    if (!purchaseList || !totalPurchasesElement) return;
+
+    // Clear the list
+    purchaseList.innerHTML = "";
+
+    // Get purchases for event
+    const purchases = getPurchasesForEvent(eventId);
+
+    // Calculate total purchase cost
+    let totalPurchaseCost = 0;
+
+    if (purchases && purchases.length > 0) {
+        totalPurchaseCost = purchases.reduce(
+            (sum, purchase) => sum + parseFloat(purchase.cost || 0),
+            0
+        );
+
+        // Display each purchase
+        purchases.forEach(purchase => {
+            const purchaseItem = document.createElement("div");
+            purchaseItem.className = "purchase-item";
+
+            purchaseItem.innerHTML = `
+                <div class="purchase-details">
+                    <h3>${purchase.name}</h3>
+                    <p>Cost: $${purchase.cost.toFixed(2)}</p>
+                </div>
+                <div class="purchase-actions">
+                    <button class="delete-purchase" data-id="${purchase.id}">Delete</button>
+                </div>
+            `;
+
+            // Add delete handler
+            purchaseItem.querySelector('.delete-purchase').addEventListener('click', () => {
+                if (confirm("Are you sure you want to delete this purchase?")) {
+                    deletePurchase(eventId, purchase.id);
+
+                    // Reload events and refresh view
+                    events = getAllEvents();
+                    viewEventDetails(); // Refresh the current event details view
+                    renderAllPurchases(); // Also refresh the 'All Purchases' list
+                }
+            });
+
+            purchaseList.appendChild(purchaseItem);
+        });
+    } else {
+        purchaseList.innerHTML = "<p>No purchases added yet.</p>";
+    }
+
+    // Update total purchases display
+    totalPurchasesElement.textContent = totalPurchaseCost.toFixed(2);
+}
+
+/**
+ * Render all purchases from all events
+ */
+function renderAllPurchases() {
+    if (!allPurchasesList) return;
+
+    const events = getAllEvents();
+    let allPurchases = [];
+    let totalAllPurchasesCost = 0;
+
+    // Collect all purchases from all events
+    events.forEach(event => {
+        if (event.purchases && event.purchases.length > 0) {
+            event.purchases.forEach(purchase => {
+                allPurchases.push({
+                    ...purchase,
+                    eventName: event.name,
+                    eventId: event.id
+                });
+                totalAllPurchasesCost += parseFloat(purchase.cost || 0);
+            });
+        }
+    });
+
+    // Clear the list
+    allPurchasesList.innerHTML = "";
+
+    // Update total cost display
+    const totalAllPurchasesElement = document.getElementById("totalAllPurchases");
+    if (totalAllPurchasesElement) {
+        totalAllPurchasesElement.textContent = totalAllPurchasesCost.toFixed(2);
+    }
+
+    // Display no purchases message if empty
+    if (allPurchases.length === 0) {
+        allPurchasesList.innerHTML = "<p>No purchases found across any events.</p>";
+        allPurchasesSection.classList.remove("hidden");
+        return;
+    }
+
+    // Sort purchases by cost (highest first)
+    allPurchases.sort((a, b) => b.cost - a.cost);
+
+    // Display each purchase with event context
+    allPurchases.forEach(purchase => {
+        const purchaseDiv = document.createElement("div");
+        purchaseDiv.className = "purchase-item";
+
+        purchaseDiv.innerHTML = `
+            <div class="purchase-details">
+                <h3>${purchase.name}</h3>
+                <p>Cost: $${purchase.cost.toFixed(2)}</p>
+                <p><em>Event: ${purchase.eventName}</em></p>
+            </div>
+            <div class="purchase-actions">
+                <button class="delete-purchase" data-id="${purchase.id}" data-event-id="${purchase.eventId}">Delete</button>
+            </div>
+        `;
+
+        // Add delete handler
+        purchaseDiv.querySelector('.delete-purchase').addEventListener('click', () => {
+            if (confirm("Are you sure you want to delete this purchase?")) {
+                deletePurchase(purchase.eventId, purchase.id);
+
+                // Reload events and refresh
+                events = getAllEvents();
+                renderAllPurchases();
+
+                // Also refresh event details if visible
+                if (!purchaseSection.classList.contains('hidden') && currentEventId === purchase.eventId) {
+                    viewEventDetails();
+                }
+            }
+        });
+
+        allPurchasesList.appendChild(purchaseDiv);
+    });
+
+    // Show the all purchases section
+    allPurchasesSection.classList.remove("hidden");
+}
+
+// NEW function to handle setting up the purchase form listener
+function setupPurchaseFormListener(eventId) {
+    const purchaseForm = document.getElementById("purchaseForm");
+    if (!purchaseForm) return;
+
+    // Remove any existing listeners to prevent duplicates
+    const newPurchaseForm = purchaseForm.cloneNode(true);
+    purchaseForm.parentNode.replaceChild(newPurchaseForm, purchaseForm);
+
+    // Add new listener
+    newPurchaseForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const purchaseName = document.getElementById("purchaseName").value;
+        const purchaseCost = document.getElementById("purchaseCost").value;
+
+        const newPurchase = {
+            name: purchaseName,
+            cost: parseFloat(purchaseCost),
+        };
+
+        // Add purchase using the imported function
+        if (addPurchaseToEvent(eventId, newPurchase)) {
+            // Reload events from localStorage
+            events = getAllEvents();
+
+            // Reset form
+            newPurchaseForm.reset();
+
+            // Refresh the event details view (which includes purchases)
+            viewEventDetails();
+
+            // Also refresh the 'All Purchases' list
+            renderAllPurchases();
+        } else {
+            console.error("Failed to add purchase.");
+            // Optionally show an error message to the user
+        }
+    });
 }
