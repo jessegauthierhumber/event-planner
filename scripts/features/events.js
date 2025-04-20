@@ -98,7 +98,7 @@ export function getEventForEdit(eventId) {
  * @returns {Array} All events
  */
 export function getAllEvents() {
-    return events;
+    return JSON.parse(localStorage.getItem("events")) || [];
 }
 
 /**
