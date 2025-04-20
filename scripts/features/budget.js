@@ -13,7 +13,7 @@ export function setupPurchaseForm(eventId) {
 
         // Find the event
         const events = JSON.parse(localStorage.getItem("events")) || [];
-        const eventIndex = events.findIndex((event) => event.id === event.id);
+        const eventIndex = events.findIndex((event) => event.id === event.Id);
         if (eventIndex === -1) return;
 
         // Create new purchase

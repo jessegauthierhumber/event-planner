@@ -204,6 +204,15 @@ function viewEventDetails() {
             0
         );
     }
+
+    if (event.purchases) {
+        totalCost += event.purchases.reduce(
+            (sum, purchase) => sum + parseFloat(purchase.cost || 0),
+            0
+        );
+    }
+
+    // Update total cost in summary
     document.getElementById("costSummary").textContent =
         totalCost.toFixed(2);
 
@@ -235,6 +244,33 @@ function viewEventDetails() {
         });
     } else {
         taskList.innerHTML = "<p>No tasks added yet.</p>";
+    }
+
+    // Display purchases
+    const purchaseList = document.getElementById("purchaseList");
+    purchaseList.innerHTML = "";
+
+    if (event.purchases && event.purchases.length > 0) {
+        event.purchases.forEach((purchase) => {
+            const purchaseItem = document.createElement("div");
+            purchaseItem.className = "purchase-item";
+
+            purchaseItem.innerHTML = `
+        <div class="purchase-details">
+          <h3>${purchase.name}</h3>
+          <p>Cost: $${purchase.cost}</p>
+        </div>
+        <div class="purchase-actions">
+          <button class="edit-purchase" data-id="${purchase.id}">Edit</button>
+          <button class="delete-purchase" data-id="${purchase.id}">Delete</button>
+        </div>
+      `;
+
+            purchaseList.appendChild(purchaseItem);
+        });
+    }
+    else {
+        purchaseList.innerHTML = "<p>No purchases added yet.</p>";
     }
 
     // Show task and summary sections
