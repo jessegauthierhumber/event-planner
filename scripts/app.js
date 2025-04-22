@@ -405,23 +405,21 @@ function setupTaskFormForEvent(eventId) {
             deadline: new Date(taskDeadline).toISOString().split('T')[0], // Ensure proper date format
         };
 
-        addTaskToEvent(eventId, newTask);
+        if (addTaskToEvent(eventId, newTask)) {
+            // Reset form
+            newTaskForm.reset();
+
+            renderAllTasks(eventId); // Refresh the tasks list
+        } else {
+            console.error("Failed to add task.");
+            // Optionally show an error message to the user
+        }
 
         // Reload events from localStorage to get the updated tasks
         events = getAllEvents();
 
-        // Reset form
-        newTaskForm.reset();
-
-        // Remove cancel button if it exists
-        const cancelTaskBtn = document.getElementById("cancelTaskBtn");
-        if (cancelTaskBtn) {
-            cancelTaskBtn.remove();
-        }
-
         // Refresh view
-        viewEventDetails();
-        renderAllTasks();
+        viewEventDetails(eventId); // Refresh the current event details view
     });
 }
 
