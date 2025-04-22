@@ -16,6 +16,19 @@ export function handleEventFormSubmit(e, currentEventId) {
     const eventDescription = document.getElementById("eventDescription").value;
     const budget = document.getElementById("budget").value;
 
+    // Add input validation
+    if (!eventName || !eventDate) {
+        alert("Please provide at least an event name and date");
+        return events;
+    }
+
+    // Validate budget is a number
+    const parsedBudget = parseFloat(budget);
+    if (isNaN(parsedBudget)) {
+        alert("Budget must be a valid number");
+        return events;
+    }
+
     if (currentEventId) {
         // Update existing event
         const eventIndex = events.findIndex(
@@ -41,6 +54,8 @@ export function handleEventFormSubmit(e, currentEventId) {
             description: eventDescription,
             budget: parseFloat(budget),
             tasks: [],
+            guests: [],
+            purchases: []
         };
 
         events.push(newEvent);
@@ -71,6 +86,7 @@ export function resetEventForm() {
  * @param {string} eventId - ID of event to delete
  * @returns {boolean} Whether deletion was confirmed
  */
+
 export function deleteEvent(eventId) {
     if (confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
         // Remove event from array
@@ -178,6 +194,8 @@ export function getGuestsForEvent(eventId) {
  * @returns {Object|undefined} Event object if found
  */
 export function getEventForEdit(eventId) {
+    // Always reload from localStorage to ensure we have the latest data
+    events = JSON.parse(localStorage.getItem("events")) || [];
     return events.find((e) => e.id === eventId);
 }
 
@@ -186,6 +204,7 @@ export function getEventForEdit(eventId) {
  * @returns {Array} All events
  */
 export function getAllEvents() {
+    events = JSON.parse(localStorage.getItem("events")) || [];
     return events;
 }
 
@@ -195,5 +214,7 @@ export function getAllEvents() {
  * @returns {Object|undefined} Event object if found
  */
 export function getEventById(eventId) {
+    // Always reload from localStorage to ensure we have the latest data
+    events = JSON.parse(localStorage.getItem("events")) || [];
     return events.find((e) => e.id === eventId);
 }
