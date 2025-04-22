@@ -521,14 +521,17 @@ function setupGuestFormForEvent(eventId) {
             rsvp: rsvp || "pending",
         };
 
-        // Add guest using the imported function
-        addGuestToEvent(eventId, newGuest);
+        if (addGuestToEvent(eventId, newGuest)) {
+            // Reset form
+            newGuestForm.reset();
+            showGuestList({ id: eventId, name: "Event Name" }); // Refresh the guest list
+        } else {
+            console.error("Failed to add guest.");
+            // Optionally show an error message to the user
+        }
 
         // Reload events from localStorage
         events = getAllEvents();
-
-        // Reset form
-        newGuestForm.reset();
 
         // Refresh view directly
         viewEventDetails();
