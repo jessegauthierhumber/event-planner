@@ -786,20 +786,21 @@ function setupPurchaseFormListener(eventId) {
 
         // Add purchase using the imported function
         if (addPurchaseToEvent(eventId, newPurchase)) {
-            // Reload events from localStorage
-            events = getAllEvents();
-
             // Reset form
-            newPurchaseForm.reset();
-
-            // Refresh the event details view (which includes purchases)
-            viewEventDetails();
+            purchaseForm.reset();
+            showPurchaseList(eventId); // Refresh the purchases list
 
             // Also refresh the 'All Purchases' list
-            renderAllPurchases();
+            renderAllPurchases(eventId);
         } else {
             console.error("Failed to add purchase.");
             // Optionally show an error message to the user
         }
+
+        // Reload events from localStorage to get the updated purchases
+        events = getAllEvents();
+
+        // Refresh view
+        viewEventDetails(eventId);
     });
 }
