@@ -20,7 +20,8 @@ import {
 import {
     setupPurchaseForm,
     getPurchasesForEvent,
-    deletePurchase
+    deletePurchase,
+    addPurchaseToEvent
 } from './features/budget.js';
 
 // Store currentEventId in app.js
@@ -165,7 +166,7 @@ function renderEvents() {
       <h3>${event.name}</h3>
       <div class="event-date">${formattedDate}</div>
       <div class="event-location">${event.location || "No location"}</div>
-      <div class="event-budget">Budget: $${event.budget}</div>
+      <div class="event-budget">Budget: $${parseFloat(event.budget).toFixed(2)}</div>
     `;
 
         eventCard.addEventListener("click", () => openEventModal(event));
@@ -189,7 +190,7 @@ function openEventModal(event) {
     modalEventDate.textContent = formattedDate;
     modalEventLocation.textContent =
         event.location || "No location specified";
-    modalEventBudget.textContent = event.budget;
+    modalEventBudget.textContent = `$${parseFloat(event.budget).toFixed(2)}`;
     modalEventDescription.textContent =
         event.description || "No description available.";
 
@@ -210,6 +211,11 @@ function viewEventDetails() {
     const event = getEventById(currentEventId);
     if (!event) return;
 
+    // Ensure the event has necessary arrays initialized
+    if (!event.tasks) event.tasks = [];
+    if (!event.purchases) event.purchases = [];
+    if (!event.guests) event.guests = [];
+
     // Update summary section
     document.getElementById("eventSummary").textContent = event.name;
     document.getElementById("dateSummary").textContent = new Date(
@@ -221,7 +227,7 @@ function viewEventDetails() {
     });
     document.getElementById("locationSummary").textContent =
         event.location || "No location";
-    document.getElementById("budgetSummary").textContent = event.budget;
+    document.getElementById("budgetSummary").textContent = `$${parseFloat(event.budget).toFixed(2)}`;
 
     // Calculate total cost from tasks and purchases
     let totalTaskCost = 0;
@@ -244,7 +250,7 @@ function viewEventDetails() {
 
     // Update total cost in summary (tasks + purchases)
     const totalEventCost = totalTaskCost + totalPurchaseCost;
-    document.getElementById("costSummary").textContent = totalEventCost.toFixed(2);
+    document.getElementById("costSummary").textContent = `$${totalEventCost.toFixed(2)}`;
 
     // Update tasks section
     document.getElementById("currentEventName").textContent = event.name;
@@ -262,7 +268,7 @@ function viewEventDetails() {
             taskItem.innerHTML = `
         <div class="task-details">
           <h3>${task.name}</h3>
-          <p>Cost: $${task.cost}</p>
+          <p>Cost: $${parseFloat(task.cost).toFixed(2)}</p>
           <p>Deadline: ${new Date(task.deadline).toLocaleDateString()}</p>
         </div>
         <div class="task-actions">
@@ -278,6 +284,49 @@ function viewEventDetails() {
                 events = getAllEvents();
                 viewEventDetails();
                 renderAllTasks();
+            });
+
+            // Add edit handler
+            taskItem.querySelector('.edit-task').addEventListener('click', () => {
+                // Get task form and ensure we have a reference to it
+                const taskForm = document.getElementById("taskForm");
+                if (!taskForm) return;
+
+                // Get task form elements
+                const taskNameInput = document.getElementById("taskName");
+                const taskCostInput = document.getElementById("taskCost");
+                const taskDeadlineInput = document.getElementById("taskDeadline");
+
+                // Populate form with task data for editing
+                taskNameInput.value = task.name;
+                taskCostInput.value = task.cost;
+                // Format date for input field (YYYY-MM-DD)
+                const deadline = new Date(task.deadline);
+                const formattedDeadline = deadline.toISOString().split('T')[0];
+                taskDeadlineInput.value = formattedDeadline;
+
+                // Scroll to form
+                taskForm.scrollIntoView({ behavior: 'smooth' });
+
+                // Add a cancel button if it doesn't exist
+                let cancelTaskBtn = document.getElementById("cancelTaskBtn");
+                if (!cancelTaskBtn) {
+                    cancelTaskBtn = document.createElement("button");
+                    cancelTaskBtn.id = "cancelTaskBtn";
+                    cancelTaskBtn.type = "button";
+                    cancelTaskBtn.className = "btn btn-secondary";
+                    cancelTaskBtn.textContent = "Cancel";
+                    taskForm.appendChild(cancelTaskBtn);
+
+                    cancelTaskBtn.addEventListener('click', () => {
+                        // Reset form and remove the cancel button
+                        taskForm.reset();
+                        cancelTaskBtn.remove();
+                    });
+                }
+
+                // First delete the task
+                deleteTaskFromEvent(event.id, task.id);
             });
 
             taskList.appendChild(taskItem);
@@ -331,10 +380,17 @@ function setupTaskFormForEvent(eventId) {
         const taskCost = document.getElementById("taskCost").value;
         const taskDeadline = document.getElementById("taskDeadline").value;
 
+        // Validate inputs
+        if (!taskName || !taskCost || !taskDeadline) {
+            alert("Please fill in all task fields");
+            return;
+        }
+
+        // Create valid task object with proper number parsing
         const newTask = {
             name: taskName,
-            cost: parseFloat(taskCost),
-            deadline: taskDeadline,
+            cost: parseFloat(taskCost) || 0, // Ensure cost is a number
+            deadline: new Date(taskDeadline).toISOString().split('T')[0], // Ensure proper date format
         };
 
         addTaskToEvent(eventId, newTask);
@@ -374,7 +430,7 @@ function renderAllTasks() {
         taskDiv.innerHTML = `
             <div class="task-details">
                 <h3>${task.name}</h3>
-                <p>Cost: $${task.cost}</p>
+                <p>Cost: $${parseFloat(task.cost).toFixed(2)}</p>
                 <p>Deadline: ${new Date(task.deadline).toLocaleDateString()}</p>
                 <p><em>Event: ${task.eventName}</em></p>
             </div>
@@ -433,12 +489,18 @@ function setupGuestFormForEvent(eventId) {
         const phone = document.getElementById("guestPhone").value;
         const rsvp = document.getElementById("guestRSVP").value;
 
+        // Add validation
+        if (!name) {
+            alert("Please provide at least a guest name");
+            return;
+        }
+
         // Create guest object
         const newGuest = {
             name: name,
-            email: email,
-            phone: phone,
-            rsvp: rsvp,
+            email: email || "",
+            phone: phone || "",
+            rsvp: rsvp || "pending",
         };
 
         // Add guest using the imported function
@@ -461,6 +523,11 @@ function showGuestList(event) {
 
     // Display guests
     guestList.innerHTML = "";
+
+    // Initialize guests array if it doesn't exist
+    if (!event.guests) {
+        event.guests = [];
+    }
 
     // Get guests for the event using our new function
     const guests = getGuestsForEvent(event.id);
@@ -587,7 +654,7 @@ function showPurchaseList(eventId) {
     }
 
     // Update total purchases display
-    totalPurchasesElement.textContent = totalPurchaseCost.toFixed(2);
+    totalPurchasesElement.textContent = `$${totalPurchaseCost.toFixed(2)}`;
 }
 
 /**
@@ -620,7 +687,7 @@ function renderAllPurchases() {
     // Update total cost display
     const totalAllPurchasesElement = document.getElementById("totalAllPurchases");
     if (totalAllPurchasesElement) {
-        totalAllPurchasesElement.textContent = totalAllPurchasesCost.toFixed(2);
+        totalAllPurchasesElement.textContent = `$${totalAllPurchasesCost.toFixed(2)}`;
     }
 
     // Display no purchases message if empty
@@ -688,9 +755,15 @@ function setupPurchaseFormListener(eventId) {
         const purchaseName = document.getElementById("purchaseName").value;
         const purchaseCost = document.getElementById("purchaseCost").value;
 
+        // Add input validation
+        if (!purchaseName || !purchaseCost) {
+            alert("Please fill in all purchase fields");
+            return;
+        }
+
         const newPurchase = {
             name: purchaseName,
-            cost: parseFloat(purchaseCost),
+            cost: parseFloat(purchaseCost) || 0, // Ensure cost is a number
         };
 
         // Add purchase using the imported function
