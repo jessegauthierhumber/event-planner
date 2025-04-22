@@ -81,7 +81,7 @@
         <h2>To-Do List:</h2>
         <div id="taskList"></div>
       </section>
-      
+
       <!--Add guests-->
       <section id="guest-section" class="hidden">
         <h1>Guest List for <span id="guestEventName">Event</span></h1>
@@ -90,14 +90,13 @@
           <input type="text" id="guestName" placeholder="Guest Name" required />
 
           <label for="guestPhone">Phone Number:</label>
-          <input type="tel" id="guestPhone" placeholder="Phone Number" required/>
+          <input type="tel" id="guestPhone" placeholder="Phone Number" />
 
           <label for="guestEmail">Email:</label>
-          <input type="email" id="guestEmail" placeholder="Email" required />
+          <input type="email" id="guestEmail" placeholder="Email" />
 
           <label for="guestRSVP">RSVP Status</label>
-          <select id="guestRSVP" required>
-            <option value="RSVPStatus">Select RSVP Status</option>
+          <select id="guestRSVP">
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
             <option value="notComing">Not Coming</option>
@@ -116,7 +115,12 @@
         <h1>Purchases for <span id="purchaseEventName">Event</span></h1>
         <form id="purchaseForm">
           <label for="purchaseName">Purchase Name</label>
-          <input type="text" id="purchaseName" placeholder="Purchase Name" required />
+          <input
+            type="text"
+            id="purchaseName"
+            placeholder="Purchase Name"
+            required
+          />
 
           <label for="purchaseCost">Cost ($)</label>
           <input type="number" id="purchaseCost" placeholder="Cost" required />
@@ -128,7 +132,6 @@
         <p>Total Purchases: $<span id="totalPurchases">0</span></p>
         <div id="purchaseList"></div>
       </section>
-
 
       <section id="summary-section" class="hidden">
         <h2 id="summary">Event Summary</h2>

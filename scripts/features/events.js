@@ -184,6 +184,8 @@ export function deleteGuest(eventId, guestId) {
  * @returns {Array} Array of guests or empty array if none found
  */
 export function getGuestsForEvent(eventId) {
+    // Always reload from localStorage to ensure we have the latest data
+    events = JSON.parse(localStorage.getItem("events")) || [];
     const event = events.find(event => event.id === eventId);
     return event && event.guests ? event.guests : [];
 }

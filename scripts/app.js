@@ -305,6 +305,9 @@ function viewEventDetails() {
                 const formattedDeadline = deadline.toISOString().split('T')[0];
                 taskDeadlineInput.value = formattedDeadline;
 
+                // Store the task ID for later use
+                taskForm.dataset.editTaskId = task.id;
+
                 // Scroll to form
                 taskForm.scrollIntoView({ behavior: 'smooth' });
 
@@ -321,12 +324,12 @@ function viewEventDetails() {
                     cancelTaskBtn.addEventListener('click', () => {
                         // Reset form and remove the cancel button
                         taskForm.reset();
+                        delete taskForm.dataset.editTaskId;
                         cancelTaskBtn.remove();
                     });
                 }
 
-                // First delete the task
-                deleteTaskFromEvent(event.id, task.id);
+                // We'll delete the task after form submission
             });
 
             taskList.appendChild(taskItem);
@@ -386,6 +389,15 @@ function setupTaskFormForEvent(eventId) {
             return;
         }
 
+        // Check if we're editing an existing task
+        const editTaskId = newTaskForm.dataset.editTaskId;
+
+        // If editing, delete the old task first
+        if (editTaskId) {
+            deleteTaskFromEvent(eventId, editTaskId);
+            delete newTaskForm.dataset.editTaskId;
+        }
+
         // Create valid task object with proper number parsing
         const newTask = {
             name: taskName,
@@ -400,6 +412,12 @@ function setupTaskFormForEvent(eventId) {
 
         // Reset form
         newTaskForm.reset();
+
+        // Remove cancel button if it exists
+        const cancelTaskBtn = document.getElementById("cancelTaskBtn");
+        if (cancelTaskBtn) {
+            cancelTaskBtn.remove();
+        }
 
         // Refresh view
         viewEventDetails();

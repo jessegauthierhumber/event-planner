@@ -13,6 +13,7 @@ export function setupPurchaseForm(eventId) {
  * @returns {Array} Array of purchases or empty array if none found
  */
 export function getPurchasesForEvent(eventId) {
+    // Always reload from localStorage to ensure we have the latest data
     const events = JSON.parse(localStorage.getItem("events")) || [];
     const event = events.find(event => event.id === eventId);
     return event && event.purchases ? event.purchases : [];
