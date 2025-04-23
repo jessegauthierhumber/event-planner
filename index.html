@@ -6,107 +6,184 @@
     <link href="./output.css" rel="stylesheet" />
     <title>Event Planner</title>
   </head>
-  <body class="bg-gray-50 text-gray-800 font-sans">
-    <header class="bg-white shadow-md sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-indigo-600">Event Planner</h1>
-        <nav>
-          <ul class="flex space-x-4 text-sm font-medium">
-            <li><a href="#eventGrid" class="hover:text-indigo-600">Events</a></li>
-            <li><a href="#event-section" class="hover:text-indigo-600">Planner</a></li>
-            <li><a href="#guest-section" class="hover:text-indigo-600">Guests</a></li>
-            <li><a href="#tasks" class="hover:text-indigo-600">Tasks</a></li>
-            <li><a href="#all-purchases" class="hover:text-indigo-600">Purchases</a></li>
-          </ul>
-        </nav>
-      </div>
+  <body>
+    <header>
+      <h1>Event Planner</h1>
+      <nav>
+        <ul>
+          <li><a href="#eventGrid">Events</a></li>
+          <li><a href="#event-section">Planner</a></li>
+          <li><a href="#guest-section">Guests</a></li>
+          <li><a href="#tasks">Tasks</a></li>
+          <li>
+            <a href="#all-purchases">Purchases</a>
+          </li>
+        </ul>
+      </nav>
     </header>
 
-    <main class="max-w-5xl mx-auto px-4 py-6 space-y-12">
+    <main>
       <section id="events">
-        <h2 class="text-xl font-semibold mb-4">Your Events</h2>
-        <div id="eventGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <div id="emptyState" class="text-center text-gray-500 col-span-full">
+        <h1>Your Events</h1>
+
+        <!-- Event Cards Grid -->
+        <div class="event-grid" id="eventGrid">
+          <!-- Event cards will be dynamically added here -->
+          <div class="empty-state" id="emptyState">
             <p>No events yet! Click "Add New Event" to get started.</p>
           </div>
         </div>
-        <div class="mt-6 text-center">
-          <button id="addEventBtn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
-            Add New Event
+
+        <button id="addEventBtn" class="add-event-btn">Add New Event</button>
+      </section>
+
+      <!-- Event Form Section (Initially Hidden) -->
+      <section id="event-section" class="hidden">
+        <h1>Add New Event</h1>
+        <form id="eventForm">
+          <label for="eventName">Event Name:</label>
+          <input type="text" id="eventName" placeholder="Event Name" required />
+
+          <label for="eventDate">Event Date:</label>
+          <input type="date" id="eventDate" required />
+
+          <label for="eventLocation">Event Location:</label>
+          <input type="text" id="eventLocation" placeholder="Location" />
+
+          <label for="eventDescription">Event Description:</label>
+          <textarea id="eventDescription" placeholder="Description"></textarea>
+
+          <label for="budget">Event Budget ($):</label>
+          <input type="number" id="budget" placeholder="Budget" required />
+
+          <div class="form-buttons">
+            <button type="submit">Save Event</button>
+            <button type="button" id="cancelEventBtn">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="tasks" class="hidden">
+        <h1>Tasks for <span id="currentEventName">Event</span></h1>
+        <form id="taskForm">
+          <label for="taskName">Task Name</label>
+          <input type="text" id="taskName" placeholder="Task" required />
+
+          <label for="taskCost">Task Cost ($)</label>
+          <input type="number" id="taskCost" placeholder="Cost" required />
+
+          <label for="taskDeadline">Deadline</label>
+          <input type="date" id="taskDeadline" required />
+
+          <button type="submit">Add Task</button>
+        </form>
+
+        <h2>To-Do List:</h2>
+        <div id="taskList"></div>
+      </section>
+
+      <!--Add guests-->
+      <section id="guest-section" class="hidden">
+        <h1>Guest List for <span id="guestEventName">Event</span></h1>
+        <form id="guestForm">
+          <label for="guestName">Guest Name</label>
+          <input type="text" id="guestName" placeholder="Guest Name" required />
+
+          <label for="guestPhone">Phone Number:</label>
+          <input type="tel" id="guestPhone" placeholder="Phone Number" />
+
+          <label for="guestEmail">Email:</label>
+          <input type="email" id="guestEmail" placeholder="Email" />
+
+          <label for="guestRSVP">RSVP Status</label>
+          <select id="guestRSVP">
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="notComing">Not Coming</option>
+          </select>
+
+          <button type="submit">Add Guest</button>
+        </form>
+
+        <h2>Guest List:</h2>
+        <p>Total Guests: <span id="guestCount">0</span></p>
+        <div id="guestList"></div>
+      </section>
+
+      <!--Add purchases-->
+      <section id="purchase-section" class="hidden">
+        <h1>Purchases for <span id="purchaseEventName">Event</span></h1>
+        <form id="purchaseForm">
+          <label for="purchaseName">Purchase Name</label>
+          <input
+            type="text"
+            id="purchaseName"
+            placeholder="Purchase Name"
+            required
+          />
+
+          <label for="purchaseCost">Cost ($)</label>
+          <input type="number" id="purchaseCost" placeholder="Cost" required />
+
+          <button type="submit">Add Purchase</button>
+        </form>
+
+        <h2>Purchases:</h2>
+        <p>Total Purchases: $<span id="totalPurchases">0</span></p>
+        <div id="purchaseList"></div>
+      </section>
+
+      <section id="summary-section" class="hidden">
+        <h2 id="summary">Event Summary</h2>
+        <p>Event Name: <span id="eventSummary"></span></p>
+        <p>Event Date: <span id="dateSummary"></span></p>
+        <p>Event Location: <span id="locationSummary"></span></p>
+        <p>Event Budget: $<span id="budgetSummary"></span></p>
+        <p>Total Current Cost: $<span id="costSummary">0</span></p>
+      </section>
+
+      <!-- All Tasks Section -->
+      <section id="all-tasks" class="hidden">
+        <h1>All Tasks</h1>
+        <div id="allTasksList"></div>
+      </section>
+
+      <!-- All Purchases Section -->
+      <section id="all-purchases" class="hidden">
+        <h1>All Purchases</h1>
+        <p>
+          Total Purchases Across All Events: $<span id="totalAllPurchases"
+            >0.00</span
+          >
+        </p>
+        <div id="allPurchasesList"></div>
+      </section>
+    </main>
+
+    <!-- Event Details Modal -->
+    <div id="eventModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2 id="modalEventName">Event Name</h2>
+        <div class="modal-details">
+          <p><strong>Date:</strong> <span id="modalEventDate"></span></p>
+          <p>
+            <strong>Location:</strong> <span id="modalEventLocation"></span>
+          </p>
+          <p><strong>Budget:</strong> $<span id="modalEventBudget"></span></p>
+          <p><strong>Description:</strong></p>
+          <p id="modalEventDescription"></p>
+        </div>
+
+        <div class="modal-actions">
+          <button id="viewDetailsBtn" class="action-btn">View Details</button>
+          <button id="editEventBtn" class="action-btn">Edit Event</button>
+          <button id="deleteEventBtn" class="action-btn delete-btn">
+            Delete Event
           </button>
         </div>
-      </section>
-
-      <section id="event-section" class="hidden">
-        <h2 class="text-xl font-semibold mb-4">Add New Event</h2>
-        <form id="eventForm" class="space-y-4 bg-white p-6 rounded shadow">
-          <div>
-            <label for="eventName" class="block font-medium">Event Name:</label>
-            <input type="text" id="eventName" placeholder="Event Name" required class="input" />
-          </div>
-
-          <div>
-            <label for="eventDate" class="block font-medium">Event Date:</label>
-            <input type="date" id="eventDate" required class="input" />
-          </div>
-
-          <div>
-            <label for="eventLocation" class="block font-medium">Event Location:</label>
-            <input type="text" id="eventLocation" placeholder="Location" class="input" />
-          </div>
-
-          <div>
-            <label for="eventDescription" class="block font-medium">Event Description:</label>
-            <textarea id="eventDescription" placeholder="Description" class="input"></textarea>
-          </div>
-
-          <div>
-            <label for="budget" class="block font-medium">Event Budget ($):</label>
-            <input type="number" id="budget" placeholder="Budget" required class="input" />
-          </div>
-
-          <div class="flex space-x-4 pt-4">
-            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save Event</button>
-            <button type="button" id="cancelEventBtn" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
-          </div>
-        </form>
-      </section>
-
-      <!-- Repeat similar structure and styling improvements for remaining sections -->
-
-      <!-- Guest List -->
-      <section id="guest-section" class="hidden">
-        <h2 class="text-xl font-semibold mb-4">Guest List for <span id="guestEventName">Event</span></h2>
-        <form id="guestForm" class="space-y-4 bg-white p-6 rounded shadow">
-          <!-- Fields... -->
-        </form>
-        <div class="pt-4">
-          <h3 class="text-lg font-medium">Guest List:</h3>
-          <p class="mb-2">Total Guests: <span id="guestCount">0</span></p>
-          <div id="guestList" class="space-y-2"></div>
-        </div>
-      </section>
-
-      <!-- Modal -->
-      <div id="eventModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-        <div class="modal-content bg-white p-6 rounded shadow-lg relative w-full max-w-md">
-          <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-lg" id="closeModal">&times;</button>
-          <h2 id="modalEventName" class="text-xl font-bold mb-2">Event Name</h2>
-          <div class="space-y-1 text-sm text-gray-700">
-            <p><strong>Date:</strong> <span id="modalEventDate"></span></p>
-            <p><strong>Location:</strong> <span id="modalEventLocation"></span></p>
-            <p><strong>Budget:</strong> $<span id="modalEventBudget"></span></p>
-            <p><strong>Description:</strong></p>
-            <p id="modalEventDescription" class="text-gray-600"></p>
-          </div>
-          <div class="mt-4 flex space-x-2">
-            <button id="viewDetailsBtn" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">View</button>
-            <button id="editEventBtn" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Edit</button>
-            <button id="deleteEventBtn" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Delete</button>
-          </div>
-        </div>
       </div>
-    </main>
+    </div>
 
     <script src="./scripts/app.js" type="module" defer></script>
   </body>
