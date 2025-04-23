@@ -1,16 +1,30 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+:root {
+  --primary: #9240cc;
+  --primary-light: #b57edc;
+  --primary-dark: #6c2b9c;
+  --bg-light: #f5f3fa;
+  --text-dark: #333;
+  --accent-light: #f0ebfa;
+}
+
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
   margin: 0;
   padding: 0;
   background-color: #ffffff;
-  color: #333;
+  color: var(--text-dark);
+  line-height: 1.6;
 }
 
 header {
-  background-color: #9240cc;
+  background-color: var(--primary);
   color: white;
-  padding: 15px;
+  padding: 20px;
   text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 nav ul {
@@ -20,38 +34,47 @@ nav ul {
   justify-content: center;
   background-color: #340b4e7e;
   margin: 0;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 nav ul li {
-  margin: 0 15px;
+  margin: 0 10px;
 }
 
 nav ul li a {
   color: white;
   text-decoration: none;
-  font-weight: bold;
-  padding: 10px 5px;
+  font-weight: 600;
+  padding: 12px 16px;
   display: block;
+  transition: background 0.3s;
+}
+
+nav ul li a:hover {
+  background-color: var(--primary-dark);
+  border-radius: 5px;
 }
 
 main {
-  width: 80%;
-  margin: auto;
+  width: 85%;
+  max-width: 1100px;
+  margin: 30px auto;
   padding: 20px;
 }
 
 section {
-  background: #f5f3fa;
-  padding: 20px;
-  margin: 20px 0;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: var(--bg-light);
+  padding: 25px;
+  margin: 25px 0;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
 }
 
 h2 {
-  color: #b57edc;
+  color: var(--primary-light);
+  margin-top: 0;
 }
 
 form {
@@ -60,37 +83,50 @@ form {
 }
 
 label {
-  font-weight: bold;
-  margin-top: 10px;
+  font-weight: 600;
+  margin-top: 15px;
 }
 
 input,
 select,
 textarea {
-  padding: 8px;
-  margin-top: 5px;
+  padding: 10px;
+  margin-top: 8px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1em;
+  transition: border 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
 textarea {
-  min-height: 100px;
+  min-height: 120px;
   resize: vertical;
 }
 
 button {
-  margin-top: 15px;
-  background-color: #b57edc;
+  margin-top: 20px;
+  background-color: var(--primary-light);
   color: white;
-  padding: 10px;
+  padding: 12px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 16px;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.2s;
 }
 
 button:hover {
-  background-color: #a76bcf;
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
 }
 
 ul {
@@ -99,56 +135,51 @@ ul {
 }
 
 ul li {
-  padding: 10px;
-  margin: 5px 0;
-  border-radius: 5px;
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 6px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 /* Event Grid Styles */
 .event-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 25px;
   margin-top: 20px;
 }
 
 .event-card {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
-  border-top: 5px solid #9240cc;
+  border-top: 5px solid var(--primary);
 }
 
 .event-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .event-card h3 {
-  color: #9240cc;
-  margin-top: 0;
+  color: var(--primary);
 }
 
-.event-date {
+.event-date,
+.event-location {
   color: #666;
   font-size: 0.9em;
   margin-bottom: 8px;
 }
 
-.event-location {
-  color: #666;
-  font-size: 0.9em;
-  margin-bottom: 15px;
-}
-
 .event-budget {
   font-weight: bold;
-  color: #4a4a4a;
+  color: #444;
   border-top: 1px solid #eee;
   padding-top: 10px;
   margin-top: 10px;
@@ -163,49 +194,45 @@ ul li {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
   overflow: auto;
 }
 
 .modal-content {
   background-color: white;
   margin: 10% auto;
-  padding: 25px;
-  border-radius: 10px;
-  width: 70%;
+  padding: 30px;
+  border-radius: 12px;
+  width: 80%;
   max-width: 600px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   position: relative;
 }
 
 .close-modal {
   position: absolute;
-  top: 10px;
+  top: 15px;
   right: 20px;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: bold;
-  cursor: pointer;
   color: #777;
+  cursor: pointer;
 }
 
 .close-modal:hover {
-  color: #333;
-}
-
-.modal-details {
-  margin: 15px 0;
+  color: var(--text-dark);
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 12px;
+  margin-top: 25px;
 }
 
 .action-btn {
-  padding: 8px 15px;
-  margin-top: 0;
+  padding: 10px 18px;
+  font-weight: 600;
 }
 
 .delete-btn {
@@ -216,7 +243,7 @@ ul li {
   background-color: #c0392b;
 }
 
-/* Additional Utility Classes */
+/* Utility Classes */
 .hidden {
   display: none;
 }
@@ -225,19 +252,22 @@ ul li {
   text-align: center;
   padding: 30px;
   color: #777;
+  font-style: italic;
 }
 
 .add-event-btn {
   display: block;
-  margin: 20px auto;
-  width: fit-content;
-  padding: 12px 25px;
+  margin: 30px auto;
+  padding: 14px 28px;
   font-size: 18px;
+  background-color: var(--primary);
+  border-radius: 8px;
 }
 
 .form-buttons {
   display: flex;
-  gap: 10px;
+  gap: 15px;
+  margin-top: 20px;
 }
 
 .form-buttons button {
@@ -246,32 +276,32 @@ ul li {
 
 /* Purchase Item Styles */
 .purchase-item {
-  background: #f9f7fd;
-  border-radius: 8px;
+  background: var(--accent-light);
+  border-radius: 10px;
   padding: 15px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease-in-out;
 }
 
 .purchase-item:hover {
-  background: #f0ebfa;
+  background: #ece6f9;
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
 }
 
 .purchase-details h3 {
-  margin: 0 0 5px 0;
-  color: #9240cc;
+  margin: 0 0 6px;
+  color: var(--primary);
 }
 
 .purchase-actions button {
-  padding: 6px 12px;
-  margin-top: 0;
+  padding: 8px 14px;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .delete-purchase {
@@ -285,15 +315,19 @@ ul li {
 @media (max-width: 768px) {
   main {
     width: 95%;
+    padding: 15px;
   }
+
   nav ul {
     flex-direction: column;
     align-items: center;
   }
+
   .modal-content {
     width: 90%;
     margin: 20% auto;
   }
+
   .event-grid {
     grid-template-columns: 1fr;
   }
